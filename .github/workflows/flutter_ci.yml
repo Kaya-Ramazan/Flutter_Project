@@ -1,0 +1,44 @@
+name: Flutter CI/CD with Robot Framework  
+
+on: 
+  push: 
+    branches: 
+      - main
+  
+jobs: 
+  build: 
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with: 
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Lint code
+        run: flutter analyze
+
+      - name: Check code formating
+        run: flutter format --set-exit-if-changed --dry-run lib test   
+
+      - name: Build APK for Android
+        run: flutter build apk --release
+
+      - name: Build IOS App
+        if: runner.os == 'macos'
+        run: flutter build ios --release    
+      
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+      
